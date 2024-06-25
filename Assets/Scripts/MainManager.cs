@@ -6,15 +6,17 @@ using UnityEngine.UI;
 
 public class MainManager : MonoBehaviour
 {
+    public Text playerNameText;
+    public InputField nameInputField;
+
+    private string currentPlayerName = "";
+
     public Brick BrickPrefab;
     public int LineCount = 6;
     public Rigidbody Ball;
 
     public Text ScoreText;
     public GameObject GameOverText;
-
-   // public int HighScore; // Corrected variable name
-  //  public string PlayerName; // Corrected variable name
 
     private bool m_Started = false;
     private int m_Points;
@@ -24,6 +26,8 @@ public class MainManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        LoadPlayerName();
+
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
 
@@ -74,16 +78,16 @@ public class MainManager : MonoBehaviour
     {
         m_GameOver = true;
         GameOverText.SetActive(true);
-
-        //if (m_Points > HighScore)
-       // {
-       //     HighScore = m_Points;
-       // }
     }
 
     public static MainManager Instance;
 
-    public int EnterPlayerName;
+    public string playerName;
+
+    public void SaveName()
+    {
+
+    }
 
     private void Awake()
     {
@@ -95,5 +99,31 @@ public class MainManager : MonoBehaviour
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
+    }
+
+    public void SavePlayerName()
+    {
+        currentPlayerName = nameInputField.text;
+        PlayerPrefs.SetString("PlayerName", currentPlayerName);
+        playerNameText.text = $"Player Name: {currentPlayerName}";
+    }
+
+    void LoadPlayerName()
+    {
+        if (PlayerPrefs.HasKey("PlayerName"))
+        {
+            currentPlayerName = PlayerPrefs.GetString("PlayerName");
+            playerNameText.text = $"Player name: {currentPlayerName}";
+        }
+
+        public void SavePlayerScore(int score)
+        {
+            PlayerPrefs.SetInt("PlayerScore", score);
+        }
+
+        public int LoadPlayerScore()
+        {
+            return PlayerPrefs.GetInt("PlayerScore", 0);
+        }
     }
 }

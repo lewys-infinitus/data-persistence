@@ -9,16 +9,14 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using System.IO;
 
 public class MenuUIHandler : MonoBehaviour
 {
-   // public InputField nameInputField;
-   // public Text HighScoreText;
-
     // Start is called before the first frame update
     void Start()
     {
-       // DisplayHighScore();
+     LoadName();
     }
 
     // Update is called once per frame
@@ -52,43 +50,52 @@ public class MenuUIHandler : MonoBehaviour
 #endif
     }
 
-    public void EnterPlayerName()
+    public void NewNameSelected()
     {
-        int enterPlayerName = MainManager.Instance.EnterPlayerName;
+        MainManager.Instance.playerName = name;
+
+        SaveName();
     }
 
-   // public void DisplayHighScore()
-   // {
-     //   int highScore = MainManager.Instance.HighScore;
-     //   HighScoreText.text = "High Score: " + highScore;
-        // Display the high score along with the player's name if available
-//if (!string.IsNullOrEmpty(MainManager.Instance.PlayerName))
-       // {
-       //     HighScoreText.text += " by " + MainManager.Instance.PlayerName;
-       // }
-   // }
+    [System.Serializable]
+    class SaveData
 
-   // public void SubmitName()
-   // {
-        //string playerName = nameInputField.text; // Corrected variable name
+    {
+        public string playerName;
+    }
 
-        //if (!string.IsNullOrEmpty(playerName))
-      //  {
-          //  MainManager.Instance.PlayerName = playerName;
-          //  DisplayHighScore();
-      //  }
-       // else
-      //  {
-          //  Debug.LogWarning("Player name is empty. Please enter a name.");
-      //  }
-   // }
+    public void SaveName()
+    {
+        //created a new instance of the save data and filled its player name member with the playerName variable saved in the MainManager
+        SaveData data = new SaveData();
+        data.playerName = MainManager.Instance.playerName;
 
-    // public void UpdateHighScore(int newScore)
-  //  {
-        //if (newScore > MainManager.Instance.HighScore)
-     //   {
-           // MainManager.Instance.HighScore = newScore;
-          //  DisplayHighScore();
-       // }
-   // }
+        //transformed that instance to JSON with JsonUtility.ToJson
+        string json = JsonUtility.ToJson(data);
+
+        //special method File.WriteAllText to write a string to a file
+        File.WriteAllText(Application.persistentDataPath + "/savefile.json", json);
+    }
+
+    public void LoadName()
+    {
+        //This method is a reversal of the SaveColor method
+        string path = Application.persistentDataPath + "/savefile.json";
+        //It uses the method File.Exists to check if a .json file exists. If it doesn’t, then nothing has been saved,
+        //so no further action is needed. If the file does exist, then the method will read its content with File.ReadAllText
+        if (File.Exists(path))
+        {
+            string json = File.ReadAllText(path);
+            //It will then give the resulting text to JsonUtility.FromJson to transform it back into a SaveData instance
+            SaveData data = JsonUtility.FromJson<SaveData>(json);
+
+            //Finally, it will set the playerName to the name saved in that SaveData
+            MainManager.Instance.playerName = data.playerName;
+        }
+    }
+
+    public void SaveNameEntered()
+    {
+        MainManager.Instance.SaveName();
+    }
 }
