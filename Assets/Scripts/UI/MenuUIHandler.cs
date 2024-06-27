@@ -10,22 +10,22 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using System.IO;
+using TMPro;
 
 public class MenuUIHandler : MonoBehaviour
 {
+    [SerializeField] private TMP_InputField _inputField;
+
+    [SerializeField] private TextMeshProUGUI _bestScoreDisplay;
+
+
     // Start is called before the first frame update
     void Start()
     {
-     LoadName();
+       BestScoreSetup();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
-    public void StartNew()
+    public void StartGame()
     {
         SceneManager.LoadScene(1);
     }
@@ -50,52 +50,15 @@ public class MenuUIHandler : MonoBehaviour
 #endif
     }
 
-    public void NewNameSelected()
-    {
-        MainManager.Instance.playerName = name;
-
-        SaveName();
-    }
-
-    [System.Serializable]
-    class SaveData
-
-    {
-        public string playerName;
-    }
-
-    public void SaveName()
-    {
-        //created a new instance of the save data and filled its player name member with the playerName variable saved in the MainManager
-        SaveData data = new SaveData();
-        data.playerName = MainManager.Instance.playerName;
-
-        //transformed that instance to JSON with JsonUtility.ToJson
-        string json = JsonUtility.ToJson(data);
-
-        //special method File.WriteAllText to write a string to a file
-        File.WriteAllText(Application.persistentDataPath + "/savefile.json", json);
-    }
-
-    public void LoadName()
-    {
-        //This method is a reversal of the SaveColor method
-        string path = Application.persistentDataPath + "/savefile.json";
-        //It uses the method File.Exists to check if a .json file exists. If it doesn’t, then nothing has been saved,
-        //so no further action is needed. If the file does exist, then the method will read its content with File.ReadAllText
-        if (File.Exists(path))
-        {
-            string json = File.ReadAllText(path);
-            //It will then give the resulting text to JsonUtility.FromJson to transform it back into a SaveData instance
-            SaveData data = JsonUtility.FromJson<SaveData>(json);
-
-            //Finally, it will set the playerName to the name saved in that SaveData
-            MainManager.Instance.playerName = data.playerName;
-        }
-    }
-
     public void SaveNameEntered()
     {
-        MainManager.Instance.SaveName();
+        DataHandler.PlayerName = _inputField.text;
+    }
+
+    private void BestScoreSetup()
+    {
+        string name = DataHandler.LoadName();
+        
+        _bestScoreDisplay.text = $"Best Score: {name}";
     }
 }
